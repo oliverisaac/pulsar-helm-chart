@@ -18,26 +18,44 @@
 #
 
 
-{{- if .Values.tls.enabled }}
-
 apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-  name: {{ include "pulsar.name" . }}-proxy-tls
+  name: {{ include "pulsar.name" . }}
   labels:
-    component: proxy
     app.kubernetes.io/name: {{ include "pulsar.name" . }}
     helm.sh/chart: {{ include "pulsar.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-type: Opaque
-data:
-  ca.pem: {{ .Values.tls.caCert }}
-  {{- if .Values.tls.authentication.enabled }}
-  key.pem: {{ .Values.tls.authentication.users.proxy.key }}
-  crt.pem: {{ .Values.tls.authentication.users.proxy.crt }}
+  annotations:
+{{ toYaml .Values.service.annotations | indent 4 }}
+spec:
+  type: LoadBalancer
+  ports:
+  {{- if .Values.tls.enabled }}
+  - name: pulsarssl
+    port: 6651
+    protocol: TCP
+  - name: https
+    port: 8443
+    protocol: TCP
   {{- else }}
-  key.pem: {{ .Values.tls.brokerKey }}
-  crt.pem: {{ .Values.tls.brokerCrt }}
+  - name: pulsar
+    port: 6650
+    protocol: TCP
+  - name: http
+    port: 8080
+    protocol: TCP
   {{- end }}
-{{- end }}
+  selector:
+    {{- if .Values.proxy.enabled }}
+    component: proxy
+    {{- else }}
+    component: broker
+    {{- end }}
+    app.kubernetes.io/name: {{ include "pulsar.name" . }}
+    helm.sh/chart: {{ include "pulsar.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  clusterIP: {{ .Values.service.clusterIP }}

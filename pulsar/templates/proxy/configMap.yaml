@@ -17,6 +17,7 @@
 # under the License.
 #
 
+{{- if .Values.proxy.enabled }}
 
 apiVersion: v1
 kind: ConfigMap
@@ -57,4 +58,5 @@ data:
   {{- end }}
 {{- if .Values.proxy.extraConfig }}
 {{ toYaml .Values.proxy.extraConfig | indent 2 }}
+{{- end }}
 {{- end }}

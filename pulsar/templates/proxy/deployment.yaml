@@ -17,6 +17,7 @@
 # under the License.
 #
 
+{{- if .Values.proxy.enabled }}
 
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -106,3 +107,4 @@ spec:
             periodSeconds: 10
           resources:
 {{ toYaml .Values.proxy.resources | indent 12 }}
+{{- end }}

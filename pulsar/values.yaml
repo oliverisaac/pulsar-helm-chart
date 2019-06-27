@@ -5,6 +5,14 @@ pulsar:
   # Available tags here: https://hub.docker.com/r/apachepulsar/pulsar/tags/
   tag: 2.3.2
 
+service:
+  type: LoadBalancer
+  # I reccommend deploying the chart. Then, when you are assigned an Load Balancer IP, save it here and set it as "static" in the Google Cloud console.
+  loadBalancerIP: ""
+  clusterIP: ""
+  # On GKE you can use annotations to make it an ILB: https://cloud.google.com/kubernetes-engine/docs/how-to/internal-load-balancing
+  annotations: {}
+
 # Configure the pulsar-admin component
 admin:
   # Use extraConfig to add more options to the settings
@@ -99,6 +107,7 @@ permissions:
 
 # Configure the broker proxy component
 proxy:
+  enabled: true
   extraConfig: {}
   replicas: 1
   java_mem: "-Xms4g -Xmx4g -XX:MaxDirectMemorySize=4g"
@@ -110,10 +119,7 @@ proxy:
   # This is essentially the ingress service.
   service:
     type: LoadBalancer
-    # I reccommend deploying the chart. Then, when you are assigned an Load Balancer IP, save it here and set it as "static" in the Google Cloud console.
-    loadBalancerIP: ""
     clusterIP: ""
-    # On GKE you can use annotations to make it an ILB: https://cloud.google.com/kubernetes-engine/docs/how-to/internal-load-balancing
     annotations: {}
 
 # We are using wait-for to wait for pods and jobs to be ready before starting other pods. This requires a role to be created if you have RBAC enabled. See templates/wait-for.yaml to see the role.
